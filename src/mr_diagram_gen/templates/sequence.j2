@@ -1,0 +1,12 @@
+{# Mermaid sequence diagram template #}
+sequenceDiagram
+{% for participant in participants %}
+    participant {{ participant.id }} as {{ participant.label }}
+{% endfor %}
+
+{% for message in messages %}
+    {{ message.from }}->>{% if message.async %}+{% endif %}{{ message.to }}: {{ message.label }}{% if message.note %} - {{ message.note }}{% endif %}
+{% if message.response %}
+    {{ message.to }}-->>{% if message.async %}-{% endif %}{{ message.from }}: {{ message.response }}
+{% endif %}
+{% endfor %}

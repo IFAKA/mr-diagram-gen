@@ -1,0 +1,17 @@
+{# Mermaid component/package diagram template #}
+graph {{ direction | default('LR') }}
+{% for subgraph in subgraphs %}
+    subgraph {{ subgraph.id }}[{{ subgraph.label }}]
+{% for node in subgraph.nodes %}
+        {{ node.id }}[{{ node.label }}{% if node.status %} - {{ node.status }}{% endif %}]
+{% endfor %}
+    end
+{% endfor %}
+
+{% for node in standalone_nodes %}
+    {{ node.id }}[{{ node.label }}{% if node.status %} - {{ node.status }}{% endif %}]
+{% endfor %}
+
+{% for edge in edges %}
+    {{ edge.from }} --> {{ edge.to }}
+{% endfor %}

@@ -1,0 +1,98 @@
+# MR Diagram Generator Configuration
+# Copy this to ~/.config/mr-diagram/config.yaml (global) or .mr-diagram.yaml (project)
+
+# Ollama LLM settings
+ollama:
+  model: codellama:13b  # Recommended: codellama:13b or deepseek-coder:6.7b
+  base_url: http://localhost:11434
+
+# GitLab settings
+gitlab:
+  url: https://gitlab.com  # or your self-hosted GitLab URL
+  # token: your-token-here  # Better to use GITLAB_TOKEN env var
+
+# GitHub settings
+github:
+  # token: your-token-here  # Better to use GITHUB_TOKEN env var
+  image_storage: gist  # 'gist' uploads to gist, 'comment' embeds Mermaid directly
+
+# Diagram output settings
+diagrams:
+  output_dir: .mr-diagrams
+  format:
+    - png
+    # - svg  # Uncomment for SVG output
+  max_diagrams: 3  # Maximum diagrams per MR
+
+# Rules for diagram generation
+rules:
+  # Files to skip when analyzing changes
+  skip_patterns:
+    - "*.md"
+    - "*.txt"
+    - "package-lock.json"
+    - "yarn.lock"
+    - "pnpm-lock.yaml"
+    - "go.sum"
+    - "Cargo.lock"
+    - "*.lock"
+    - ".gitignore"
+    - "*.min.js"
+    - "*.min.css"
+    - "dist/**"
+    - "build/**"
+    - "node_modules/**"
+    - "vendor/**"
+
+  # Files that should always get diagrams (override classification)
+  always_diagram:
+    - "src/api/**"
+    - "src/models/**"
+    - "internal/handlers/**"
+    - "pkg/**"
+    - "**/schema/**"
+
+# Language-specific settings
+languages:
+  react:
+    diagrams:
+      - component-tree
+      - state-flow
+      - hook-deps
+    focus_patterns:
+      - "src/components/**"
+      - "src/hooks/**"
+      - "src/pages/**"
+      - "src/context/**"
+
+  nodejs:
+    diagrams:
+      - api-routes
+      - middleware-chain
+      - module-deps
+    focus_patterns:
+      - "routes/**"
+      - "controllers/**"
+      - "services/**"
+      - "middleware/**"
+
+  golang:
+    diagrams:
+      - package-deps
+      - interface-impl
+      - handler-flow
+    focus_patterns:
+      - "internal/**"
+      - "pkg/**"
+      - "cmd/**"
+      - "api/**"
+
+  typescript:
+    diagrams:
+      - component-tree
+      - type-hierarchy
+      - module-deps
+    focus_patterns:
+      - "src/**/*.ts"
+      - "src/**/*.tsx"
+      - "lib/**"

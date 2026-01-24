@@ -1,0 +1,9 @@
+{# Mermaid flowchart template #}
+graph {{ direction | default('TD') }}
+{% for node in nodes %}
+    {{ node.id }}{% if node.label %}[{{ node.label }}{% if node.status %} - {{ node.status }}{% endif %}]{% endif %}
+{% endfor %}
+
+{% for edge in edges %}
+    {{ edge.from }} -->{% if edge.label %}|{{ edge.label }}|{% endif %} {{ edge.to }}
+{% endfor %}
