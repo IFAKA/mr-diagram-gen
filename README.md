@@ -12,7 +12,7 @@ pip install mr-diagram-gen
 
 Or install from source:
 ```bash
-git clone https://github.com/YOUR_USERNAME/mr-diagram-gen.git
+git clone https://github.com/IFAKA/mr-diagram-gen.git
 cd mr-diagram-gen
 pip install .
 ```
