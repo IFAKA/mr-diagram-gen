@@ -2,155 +2,122 @@
 
 Auto-generate architecture diagrams for your merge requests / pull requests.
 
-Analyzes your code changes, decides if diagrams would help reviewers understand them, and generates Mermaid diagrams compiled to images.
-
 ## Install
 
 ```bash
-pip install mr-diagram-gen
+curl -fsSL https://raw.githubusercontent.com/IFAKA/mr-diagram-gen/main/setup.sh | bash
 ```
 
-Or install from source:
+Or manually:
 ```bash
-git clone https://github.com/IFAKA/mr-diagram-gen.git
-cd mr-diagram-gen
-pip install .
-```
-
-### Requirements
-
-- Python 3.10+
-- [Ollama](https://ollama.ai) running locally with a code model
-- Node.js (for diagram rendering)
-
-```bash
-# Install Ollama (macOS)
-brew install ollama
-
-# Pull a code model
-ollama pull codellama:13b
-
-# Install mermaid diagram renderer
-npm install -g @mermaid-js/mermaid-cli
-# or just run: mr-diagram-gen install-deps
+pip install git+https://github.com/IFAKA/mr-diagram-gen.git
 ```
 
 ## Uninstall
 
 ```bash
-# Remove the package
-pip uninstall mr-diagram-gen
-
-# Remove config (optional)
-rm -rf ~/.config/mr-diagram
-
-# Remove mermaid-cli (optional)
-npm uninstall -g @mermaid-js/mermaid-cli
+curl -fsSL https://raw.githubusercontent.com/IFAKA/mr-diagram-gen/main/uninstall.sh | bash
 ```
 
-Zero traces left.
+Or manually:
+```bash
+pip uninstall mr-diagram-gen && rm -rf ~/.config/mr-diagram
+```
 
-## Usage
+Zero traces.
+
+---
+
+## Use It
 
 ```bash
-# In any git repo, on a feature branch:
+cd your-project
 mr-diagram-gen analyze --local
 ```
 
-That's it. It will:
-1. Detect your project type (React, Node, Go, TypeScript, etc)
-2. Analyze what changed vs the main branch
-3. Ask the LLM if diagrams would help
-4. Generate Mermaid diagrams
-5. Compile them to PNG images
-6. Save to `.mr-diagrams-preview/`
+That's it. Opens your diagrams when done.
 
-### Commands
+---
+
+## Integrate Into Your Workflow
+
+### Option 1: Run manually when you want diagrams
+```bash
+# Before creating MR/PR, generate diagrams
+mr-diagram-gen analyze --local
+# Then drag images into your MR/PR description
+```
+
+### Option 2: Git hook (auto-run before push)
+```bash
+mr-diagram-gen install-hook
+# Now it runs automatically every time you push
+```
+
+### Option 3: Auto-create MR/PR with diagrams
+```bash
+# Set token once
+export GITLAB_TOKEN=xxx  # or GITHUB_TOKEN
+
+# Push and create MR/PR in one command
+mr-diagram-gen push
+```
+
+### Option 4: CI/CD
+```yaml
+# .gitlab-ci.yml
+diagram:
+  script:
+    - pip install git+https://github.com/IFAKA/mr-diagram-gen.git
+    - mr-diagram-gen analyze --local --mock-llm
+  artifacts:
+    paths:
+      - .mr-diagrams-preview/
+```
+
+---
+
+## Commands
 
 | Command | What it does |
 |---------|--------------|
-| `analyze --local` | Generate diagrams locally (no MR/PR) |
-| `analyze --local --mock-llm` | Same but skip Ollama (for testing) |
-| `push` | Generate + create/update GitLab MR or GitHub PR |
+| `analyze --local` | Generate diagrams, save locally |
+| `analyze --local --mock-llm` | Same but skip Ollama |
+| `push` | Generate + create MR/PR |
 | `preview` | Open generated diagrams |
-| `status` | Check if everything's set up |
-| `init` | Create config file |
-| `install-deps` | Install mermaid-cli |
+| `status` | Check setup |
 | `install-hook` | Add git pre-push hook |
 
-### Flags
+## Requirements
 
-| Flag | What it does |
-|------|--------------|
-| `--local` | Don't create MR/PR, just generate locally |
-| `--mock-llm` | Use fake LLM responses (no Ollama needed) |
-| `--dry-run` | Show what would happen without doing it |
-| `--base <branch>` | Compare against specific branch |
+- Python 3.10+
+- [Ollama](https://ollama.ai) with `codellama:7b` (the setup script handles this)
+- Node.js for PNG rendering (optional, falls back to Mermaid code)
 
-## How it decides
+## How it works
 
-Diagrams are generated for:
-- New features with multiple components
-- API changes
-- Database/schema changes
-- Refactoring
-- New modules
+1. Detects project type (React, Node, Go, TypeScript, etc)
+2. Analyzes git diff vs main branch
+3. Asks LLM: "do these changes need diagrams?"
+4. If yes, generates Mermaid diagrams
+5. Compiles to PNG images
 
-Diagrams are skipped for:
-- Typo fixes
-- Config changes
-- Docs updates
-- Test-only changes
-- Dependency bumps
+Skips diagrams for: typo fixes, config changes, docs, tests, dependency bumps.
 
-## Config
+## Config (optional)
 
-Optional. Create `~/.config/mr-diagram/config.yaml` or `.mr-diagram.yaml` in your project:
+```bash
+mr-diagram-gen init  # creates ~/.config/mr-diagram/config.yaml
+```
 
 ```yaml
 ollama:
-  model: codellama:13b  # or codellama:7b for faster
-
-diagrams:
-  max_diagrams: 3
-  format: [png]
+  model: codellama:7b  # or codellama:13b for better quality
 
 rules:
-  skip_patterns:
-    - "*.md"
-    - "package-lock.json"
   always_diagram:
-    - "src/api/**"
+    - "src/api/**"  # always generate for API changes
 ```
-
-## Try it
-
-```bash
-# Create a test project
-./scripts/create-test-repo.sh /tmp/test-project
-
-# Run analysis
-cd /tmp/test-project
-mr-diagram-gen analyze --local
-
-# View diagrams
-mr-diagram-gen preview
-```
-
-## Supported
-
-| Project | Detection |
-|---------|-----------|
-| React | `package.json` with react |
-| Node.js | `package.json` |
-| Go | `go.mod` |
-| TypeScript | `tsconfig.json` |
-| Other | Falls back to file analysis |
-
-| Platform | Support |
-|----------|---------|
-| GitLab | Full (MR + image upload) |
-| GitHub | Full (PR + native Mermaid) |
 
 ## License
 
